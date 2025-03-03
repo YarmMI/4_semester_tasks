@@ -4,21 +4,20 @@
 
 #include <iostream>
 #include <initializer_list>
-//#include <vector>
 using namespace std;
 
 template <typename type>
 class Vector {
     private:
     type* data;
-    size_t size;
-    size_t capacity;
+    int size;
+    int capacity;
 
     public:
-    Vector() : data(nullptr), size(0), capacity(0) {}
-    Vector (const size_t siz) :data(new type [siz]), size(siz), capacity(siz) {
+    Vector() : data(nullptr), size(0), capacity(0) {} // как именно он работает
+    Vector (const size_t siz) :data(new type [siz]), size(siz), capacity(siz) { // что если мы подаём строку, реализовать более универсальный конструктор - "конструктор по умолчанию"
         for (size_t i=0; i<size; i++) {
-            data[i] = type(0);
+            data[i] = type(0); // Здесь может быть ошибка
         }
     }
     Vector (initializer_list<type> arr) : data(new type [arr.size()]), size(arr.size()), capacity(arr.size()) {
@@ -28,8 +27,8 @@ class Vector {
             i++;
         }
     }
-    ~Vector () {
-        if (size > 0) {
+    ~Vector () { // добавить проверку что именно он удаляет
+        if (capacity > 0) {
             delete [] data;
         }
     }
@@ -39,7 +38,7 @@ class Vector {
     type & operator [](const size_t index) {
         return data[index];
     }
-    size_t Size() {
+    int Size() {
         return size;
     }
     void push_back (const type elem) {
@@ -61,10 +60,9 @@ class Vector {
     }
     void pop_back () {
         if (size == 0) throw (0);
-        if (size == 1) throw (1);
         size--;
     }
-   void insert(int index, type elem) {
+   void insert(int index, type elem) { // переписать не копируя весь массив, а сначала скопировать до elem потом его вставить и после него скопировать
     if (size+1 >= capacity)  {
         capacity *= 2;
             type* tmp = new type [capacity];
@@ -149,9 +147,6 @@ int main (void) {
             cout << "Cant delete in zero size" << endl;
             return 1;
         }
-        if (x==1) {
-            return 0;
-        }
     }
     cout << endl;
     // 6) Удаление по индексу 
@@ -167,5 +162,6 @@ int main (void) {
     }
     cout << endl;
     cout << endl;
+    return 0;
 }   
 
