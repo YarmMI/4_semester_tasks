@@ -1,9 +1,11 @@
 // Задача 2.2 (1 балл). Написать на C++ шаблонный класс динамического массива Vector<T>, не используя std::vector 
 //(конструкторы, деструктор, функция добавления в конец и по индексу, удаления элемента с конца и по индексу, доступа к элементу) и тестирующую программу
+// Задача 2.4 (1 балл, требует 2.2). Написать классы итераторов для класса Vector, определить функции begin и end и показать, что с ними работает range-based for loop.
 // Задача 2.5 (+0.5 балла к задаче 2.2): сделать так, чтобы работал инициализатор
 
 #include <iostream>
 #include <initializer_list>
+#include <string>
 using namespace std;
 
 template <typename type>
@@ -14,11 +16,15 @@ class Vector {
     int capacity;
 
     public:
-    Vector() : data(nullptr), size(0), capacity(0) {} // как именно он работает
-    Vector (const size_t siz) :data(new type [siz]), size(siz), capacity(siz) { // что если мы подаём строку, реализовать более универсальный конструктор - "конструктор по умолчанию"
+    Vector() : data(nullptr), size(0), capacity(0) {
+        cout << "Вызван стандартный конструктор" << endl;
+    } // как именно он работает
+    Vector (const size_t siz) :data(new type [siz]), size(siz), capacity(siz) {
+        cout << "Вызван специальный конструктор" << endl; 
         for (size_t i=0; i<size; i++) {
-            data[i] = type(0); // Здесь может быть ошибка
+            data[i] = type();
         }
+        cout << endl;
     }
     Vector (initializer_list<type> arr) : data(new type [arr.size()]), size(arr.size()), capacity(arr.size()) {
         int i=0;
@@ -27,8 +33,13 @@ class Vector {
             i++;
         }
     }
-    ~Vector () { // добавить проверку что именно он удаляет
+    ~Vector () {
         if (capacity > 0) {
+            cout << "destructor: ";
+            for(int i =0; i< size; i++) {
+                cout << data[i] <<  " ";
+            }
+            cout << endl; 
             delete [] data;
         }
     }
@@ -62,18 +73,24 @@ class Vector {
         if (size == 0) throw (0);
         size--;
     }
-   void insert(int index, type elem) { // переписать не копируя весь массив, а сначала скопировать до elem потом его вставить и после него скопировать
+   void insert(int index, type elem) { 
     if (size+1 >= capacity)  {
         capacity *= 2;
             type* tmp = new type [capacity];
-            for (int i=0; i<size; i++) {
+            for (int i=0; i<index; i++) {
                 tmp[i] = data[i];
+            }
+            tmp[index] = elem;
+            for (int i=index+1; i<size+1; i++) {
+                tmp[i] = data[i-1];
             }
             delete [] data;
             data = tmp;
+            size++;
+            return;
     }
-    for(int i=size-1; i != index-1; i--) {
-        data[i+1] = data[i];
+    for(int i=size; i > index; i--) {
+        data[i] = data[i-1];
     }
     data[index] = elem;
     size++;
@@ -85,6 +102,29 @@ class Vector {
     size--;
    }
 
+   class Iterator {
+    private:
+    type *ptr;
+    public:
+    Iterator(type* data = nullptr) : ptr(data) {}
+    Iterator& operator++() {
+        ++ptr;
+        return*this;
+    }
+    bool operator != (const Iterator& other)const {
+        return this->ptr != other.ptr;
+    }
+    type& operator* () {
+        return *ptr;
+    }
+   };
+   Iterator begin() {
+    return Iterator(data);
+   }
+   Iterator end () {
+    return Iterator(data+size);
+   }
+
 };
 
 int main (void) {
@@ -93,7 +133,7 @@ int main (void) {
     cout << "Элемент вектора по равенству под номером 3 = " << my_vec[2] << endl;
     cout << endl;
     // 2) Доступ к элементу
-    Vector <int> vec = {1,2,3,4,5,6,7,8,9,10};
+    Vector <int> vec = {1,2,3,4,5,6,7,8};
     cout << "vec[3] before change = " << vec[3] << endl;
     vec[3] = 18;
     cout << "vec[3] after change = " << vec[3] << endl;
@@ -117,7 +157,7 @@ int main (void) {
         cout << vec[i] << " ";
     }
     cout << endl;
-    vec.insert(6, 100);
+    vec.insert(0, 100);
     cout << "Вектор после добавления - " ;
     for (int i=0; i<vec.Size(); i++) {
         cout << vec[i] << " ";
@@ -162,6 +202,28 @@ int main (void) {
     }
     cout << endl;
     cout << endl;
+    //7.Подаём строку в конструктор
+    Vector <char> vec_ch;
+    Vector <string> (5);
+    cout << endl;
+    cout << endl;
+
+    //8 Итераторы
+    Vector <string> vec_it = {"one", "two", "three", "four", "five"};
+    cout<< "Цикл for с итераторами: ";
+    for (auto x = vec_it.begin();x != vec_it.end();++x) {
+        cout << *x << " ";
+    }
+    cout << endl;
+    cout <<endl;
+    cout << "range-based-for: ";
+    Vector <double> vec_i2 = {14,15,12.1140,9.148,-84.012};
+    for(auto y: vec_i2) {
+        cout << y<< " ";
+    }
+    cout << endl;
+    cout <<endl;
+
     return 0;
 }   
 
