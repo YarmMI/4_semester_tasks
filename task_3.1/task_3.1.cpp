@@ -1,7 +1,6 @@
 //Задача 3.1 (1 балл) Реализовать chunked_list<chunk_size, T> — гибрид списка и массива, который хранит элементы односвязным списком массивов длины chunk_size.
 using namespace std;
 #include <iostream>
-#include <string>
 template <typename type, size_t ch_size>
 class ch_list{
     struct ListNode{
@@ -11,7 +10,7 @@ class ch_list{
         ListNode () : next(nullptr), arr_size(0), data(new type[ch_size]) {}
         ~ListNode() {
             if (data) {
-                delete [] data;
+                delete[] data;
             }
         }
     };
@@ -64,7 +63,8 @@ class ch_list{
             tail = nullptr;
        }
     }
-    void insert(size_t index, const type value) {
+    void insert(size_t index, const type value) { // реализовать вставку и удаление без глобального сдвига, а //только если удаление и элемент x не последний, то удаляем x остальные элементы этого чанка сдвигаем ///наверх, остальные чанки вообще не трогаем, вставка если переполнился нынешний чанк, то создаём новый чанк и //там вставляем последний элемент предыдущего чанка, остальыне в новом - 0
+        //методы insert и erase за O(1)
         ListNode* tmp = head;
         ListNode* current;
         for (int i=0; i < int(index/ch_size); i++) {
@@ -73,7 +73,7 @@ class ch_list{
         index = index % ch_size;
         type a = tmp->data[ch_size-1];
         type b;
-        for (int i=ch_size-1; i!= index; i--) {
+        for (size_t i=ch_size-1; i!= index; i--) {
             tmp->data[i] = tmp->data[i-1];
         }
         tmp->data[index] = value;   
@@ -122,7 +122,7 @@ class ch_list{
         while (current != nullptr) {
             if (current == tail && current->arr_size != 1) {
                 temp->data[temp->arr_size-1] = current->data[0];  
-                for (int i=0; i< current->arr_size; i++) {
+                for (size_t i=0; i< current->arr_size; i++) {
                     current->data[i] = current->data[i+1];
                 }
                 current->arr_size--;
@@ -136,7 +136,7 @@ class ch_list{
                 break;
             }
             if (current == tmp && current->next != nullptr) {
-                for (int i= index; i < current->arr_size-1; i++) {
+                for (size_t i= index; i < current->arr_size-1; i++) {
                     current->data[i] = current->data[i+1];
                 }
                 temp = current;
@@ -144,7 +144,7 @@ class ch_list{
                 continue;
             }
             else if (current == tmp && current->next == nullptr) {
-                for (int i= index; i < current->arr_size-1; i++) {
+                for (size_t i= index; i < current->arr_size-1; i++) {
                     current->data[i] = current->data[i+1];
                 }
                 current->arr_size--;
@@ -152,7 +152,7 @@ class ch_list{
             }
             temp->data[temp->arr_size-1] = current->data[0];
             temp = current;
-            for (int i=0; i<current->arr_size; i++) {
+            for (size_t i=0; i<current->arr_size; i++) {
                 current->data[i] = current->data[i+1];
             }
             current = current->next;
