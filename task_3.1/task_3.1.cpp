@@ -19,6 +19,13 @@ class ch_list{
     size_t ch_amount;
     public: 
     ch_list (): head(nullptr), tail(nullptr), ch_amount(0) {};
+    ~ch_list() {
+        while(head) {
+            ListNode* tmp = head;
+            head = head->next;
+            delete tmp;
+        }
+    }
     void push_back(const type value) {
         if (tail == nullptr || tail->arr_size == ch_size) {
             ListNode* new_node = new ListNode();
@@ -32,7 +39,7 @@ class ch_list{
     void print() {
         ListNode* tmp = head;
         while(tmp != nullptr) {
-            for (size_t i=0; i<tmp->arr_size; i++) {
+            for (size_t i=0; i< ch_size; i++) {
                 cout << tmp->data[i] << " " ;
             }
             tmp = tmp->next;
@@ -63,53 +70,35 @@ class ch_list{
             tail = nullptr;
        }
     }
-    void insert(size_t index, const type value) { // реализовать вставку и удаление без глобального сдвига, а //только если удаление и элемент x не последний, то удаляем x остальные элементы этого чанка сдвигаем ///наверх, остальные чанки вообще не трогаем, вставка если переполнился нынешний чанк, то создаём новый чанк и //там вставляем последний элемент предыдущего чанка, остальыне в новом - 0
-        //методы insert и erase за O(1)
+    void insert(size_t index, const type value) { 
         ListNode* tmp = head;
         ListNode* current;
+        type a = type();
         for (int i=0; i < int(index/ch_size); i++) {
             tmp = tmp->next;
         }
         index = index % ch_size;
-        type a = tmp->data[ch_size-1];
-        type b;
-        for (size_t i=ch_size-1; i!= index; i--) {
-            tmp->data[i] = tmp->data[i-1];
-        }
-        tmp->data[index] = value;   
-        current = tmp->next;
-        while(current != tail) {
-            for (int i=ch_size-1;i!= 0; i--) {
-                if (i == ch_size-1) b = current->data[i];
-                current->data[i] = current->data[i-1];
+        if(tmp->arr_size < ch_size) {
+            for(int i= tmp->arr_size; i> index; i--) {
+                tmp->data[i] = tmp->data[i-1];
             }
-            current->data[0] = a;
-            a = b;
-            current = current->next;
-        }
-        if(tail->arr_size < ch_size) {
-            tail->arr_size++;
-            for (int i = tail->arr_size-1; i !=0; i--) {
-                tail->data[i] = tail->data[i-1];
-            }
-            tail->data[0] = a;
-            
+            tmp->data[index] = value;
+            tmp->arr_size++;
         }
         else {
-            ListNode* new_Node = new ListNode();
-            b = tail->data[ch_size-1];
-            for (int i=ch_size-1; i !=0; i--) {
-                tail->data[i] = tail->data[i-1];
+            ListNode* NewNode = new ListNode;
+            a = tmp->data[tmp->arr_size-1];
+            for(int i= tmp->arr_size-1; i> index; i--) {
+                tmp->data[i] = tmp->data[i-1];
             }
-            tail->data[0] = a;
-            new_Node->data[0] = b;
-            tail->next = new_Node;
-            new_Node->arr_size++;
-            tail = new_Node;
-            tail->next = nullptr;
+            tmp->data[index] = value;
+            NewNode->data[0] = a;
+            NewNode->next = tmp->next;
+            NewNode->arr_size++;
+            tmp->next = NewNode;
+            if(tmp == tail) tail = NewNode;
         }
-        ch_amount++; 
-        
+        ch_amount++;
     }
     void erase( size_t index) {
         ListNode*tmp = head;
@@ -117,61 +106,55 @@ class ch_list{
             tmp = tmp->next;
         }
         index = index % ch_size;
-        ListNode* current = tmp;
-        ListNode*temp = nullptr;
-        while (current != nullptr) {
-            if (current == tail && current->arr_size != 1) {
-                temp->data[temp->arr_size-1] = current->data[0];  
-                for (size_t i=0; i< current->arr_size; i++) {
-                    current->data[i] = current->data[i+1];
-                }
-                current->arr_size--;
-                break;
+        if(tmp->arr_size > 1) {
+            for (int i= index; i< tmp->arr_size-1; i++) {
+                tmp->data[i] = tmp->data[i+1];
             }
-            else if (current == tail && current->arr_size == 1) {
-                temp->data[temp->arr_size-1] = current->data[0];
-                current->arr_size--;
-                current = nullptr;
-                tail = temp;
-                break;
-            }
-            if (current == tmp && current->next != nullptr) {
-                for (size_t i= index; i < current->arr_size-1; i++) {
-                    current->data[i] = current->data[i+1];
-                }
-                temp = current;
-                current = current->next;
-                continue;
-            }
-            else if (current == tmp && current->next == nullptr) {
-                for (size_t i= index; i < current->arr_size-1; i++) {
-                    current->data[i] = current->data[i+1];
-                }
-                current->arr_size--;
-                break;
-            }
-            temp->data[temp->arr_size-1] = current->data[0];
-            temp = current;
-            for (size_t i=0; i<current->arr_size; i++) {
-                current->data[i] = current->data[i+1];
-            }
-            current = current->next;
+           tmp->data[tmp->arr_size-1] = type();
+            tmp->arr_size--;
+            
         }
+        else {
+            if (tmp == head && tmp == tail) {
+                delete tmp;
+                head = nullptr;
+                tail = nullptr;
+            }
+            else if (tmp == head) {
+                head = head->next;
+                delete tmp;
+            }
+            else {
+                ListNode*curr = head;
+                while(curr->next != tmp) {
+                    curr = curr->next;
+                }
+                if(tmp == tail) {
+                    delete tmp;
+                    tail = curr;
+                }
+                else {
+                curr->next = tmp->next;
+                delete tmp;
+                }
+            }
+            ch_amount--;
+        }         
     }    
 };
 
 int main () { 
     // 1. push-back
-    ch_list<int, 3> my_list;
+    ch_list<int, 4> my_list;
     for (int i=0; i< 20; i++) {
         my_list.push_back(i);
     }
     my_list.print();
     cout << "--------------" << endl;
     // 2.pop-back
-    my_list.pop_back();
-    my_list.pop_back();
-    ch_list <string, 4> str_list;
+    //my_list.pop_back();
+    //my_list.pop_back();
+    ch_list <string, 2> str_list;
     str_list.push_back("abc");
     /* try {
         str_list.pop_back();
@@ -189,9 +172,8 @@ int main () {
     str_list.pop_back();
     str_list.print();
     //3. insert
-    my_list.insert(6, 65);
+    my_list.insert(2, 65);
     my_list.insert(9, -9);
-    my_list.insert(13, 21);
     my_list.insert(0, 19);
     my_list.print();
     cout << "--------------" << endl;
