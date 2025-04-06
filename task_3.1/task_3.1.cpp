@@ -39,7 +39,7 @@ class ch_list{
     void print() {
         ListNode* tmp = head;
         while(tmp != nullptr) {
-            for (size_t i=0; i< ch_size; i++) {
+            for (size_t i=0; i< tmp->arr_size; i++) {
                 cout << tmp->data[i] << " " ;
             }
             tmp = tmp->next;
@@ -87,14 +87,15 @@ class ch_list{
         }
         else {
             ListNode* NewNode = new ListNode;
-            a = tmp->data[tmp->arr_size-1];
-            for(int i= tmp->arr_size-1; i> index; i--) {
-                tmp->data[i] = tmp->data[i-1];
+            int new_size=0;
+            for(int i= index; i<tmp->arr_size;i++) {
+                NewNode->data[new_size] = tmp->data[i];
+                new_size++;
             }
             tmp->data[index] = value;
-            NewNode->data[0] = a;
             NewNode->next = tmp->next;
-            NewNode->arr_size++;
+            NewNode->arr_size = new_size;
+            tmp->arr_size = ch_size - new_size+1;
             tmp->next = NewNode;
             if(tmp == tail) tail = NewNode;
         }
@@ -173,8 +174,8 @@ int main () {
     str_list.print();
     //3. insert
     my_list.insert(2, 65);
-    my_list.insert(9, -9);
-    my_list.insert(0, 19);
+    //my_list.insert(9, -9);
+    //my_list.insert(0, 19);
     my_list.print();
     cout << "--------------" << endl;
     //4. erase
