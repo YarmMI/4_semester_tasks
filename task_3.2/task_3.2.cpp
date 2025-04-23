@@ -1,72 +1,49 @@
 //Задача 3.2 (2 балла) Реализовать класс Object, у которого есть операция std::string get(std::string key),
 //  insert(std::string key, std::string value) с амортизированным постоянным временем работы этих методов
 #include <iostream>
-#include <string>
-#include <vector>
+#include<unordered_map>
 using namespace std;
 
-class Object {
+class Object{
     private:
-    vector<string> keys;
-    vector<string> values;
+    std::unordered_map<string, string> table;
     public:
-    hash<string> hasher;
-    void insert(const string key,const string value) {
-        if(keys.size() == 0) {
-            keys.push_back(key);
-            values.push_back(value);
-            return;
-        }
-        for(int i=0; i<keys.size(); i++){
-            if(hasher(key) == hasher(keys[i])) {
-                if(key == keys[i]) {
-                    values[i] = value;
-                    return;
-                }
-            }  
-        }
-        keys.push_back(key);
-        values.push_back(value);
+    void insert(const string key, const string value) {
+        table[key] = value;
     }
-    string get(string key) {
-        for (int i=0; i<keys.size(); i++) {
-            if(hasher(key) == hasher(keys[i])){
-                if(key == keys[i]) {
-                    return values[i];
-                }
-            }
+    string get(const string key) const{
+        auto pair = table.find(key);
+        if(pair != table.end()) {
+            return pair->second;
         }
-        throw(0);
-    }
-    void print() {
-        for(int i=0; i<keys.size(); i++) {
-            cout << keys[i] << " -- " << values[i] << endl;
+        else {
+            throw(0);
+            return "\0";
         }
     }
+
 };
 
 int main (void) {
     Object obj;
-    obj.insert("3", "abc");
-    obj.insert("2", "cde");
-    obj.insert("6", "asw");
-    obj.insert("8","dfa");
-    obj.print();
-    cout << endl;
-    cout << endl;
-    obj.insert("2", "uio");
-    obj.insert("8", "tre");
-    obj.print();
-    cout << endl;
-    cout << obj.get("6")<<endl;
+    obj.insert("1", "First");
+    obj.insert("2", "Second");
+    obj.insert("3", "Third");
+    obj.insert("4", "Fourth");
+    obj.insert("5", "Fifth");
+
+    cout<< obj.get("3") << endl;
+    obj.insert("3", "New value");
+    cout<< obj.get("3") << endl;
     /*try{
-        obj.get("7");
+        obj.get("10");
     }
     catch(int x) {
-        if(x == 0){
-        cout<<"Have no key" <<endl;
-        return 1;
+        if(x == 0) {
+            cout << "No key in table" << endl;
+            return 1;
         }
     }*/
     return 0;
+    
 }
